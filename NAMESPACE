@@ -1,0 +1,5 @@
+exportPattern("^[[:alpha:]]+")
+importFrom(dplyr, summarise)
+importFrom(vcfR, read.vcfR)
+importFrom(data.table, setDT, setkey)
+import(data.table)
