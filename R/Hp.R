@@ -1,3 +1,27 @@
+#' Hetp: Calculate pooled Heterozygosity Per Window from VCF Data
+#'
+#' This function calculates the heterozygosity per window from a VCF file, analyzing SNPs across specified genomic windows.
+#'
+#' @param vcf_file A character string representing the path to the VCF file to be analyzed.
+#' @param window_size An integer specifying the size of the genomic window (in base pairs) for analysis. The default is set to 150,000.
+#'
+#' @return A data frame containing the calculated heterozygosity per window, along with maximum and minimum SNP counts for each range.
+#'         The returned data frame includes columns for chromosome, range, maximum value, minimum value, heterozygosity (hp), and Z-scores of heterozygosity.
+#'
+#' @details The function reads a VCF file, processes SNP data to create genomic windows, and counts the number of SNPs within each window. 
+#'          It calculates the heterozygosity per window using the formula:
+#'          \deqn{hp = \frac{2 \cdot Max\_Value \cdot Min\_Value}{(Max\_Value + Min\_Value)^2}}
+#'          It also computes the Z-scores for heterozygosity values.
+#'
+#' @note The input VCF file must be in a valid format, and the function requires the `data.table` and `dplyr` packages for data manipulation.
+#'
+#' @examples
+#' # Example usage:
+#' heterozygosity_results <- Hetp("path/to/sample.vcf", window_size = 150000)
+#'
+#' # Output: A data frame with heterozygosity calculations for each window
+#'
+#' @export
 Hetp <- function(vcf_file=vcf_file, window_size=150000){
   vcf <- read.vcfR(vcf_file)
   snp <- as.data.frame(vcf@fix)

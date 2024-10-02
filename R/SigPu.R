@@ -13,7 +13,34 @@ RunHom <- function(file=file, homozygWS = 50, homozygS = 50, homozygWM = 3,
   }else(cat("File not found"))
 }
 # ROH <- RunHom(file = "All.GT", chrset = 30)
-###################### Tajima's D ###################################
+#' Tajima's D: Calculate Tajima's D for Genomic Windows from VCF Data
+#'
+#' This function calculates Tajima's D statistic for genomic windows based on SNP data from a VCF file. 
+#' It assesses genetic diversity and can help identify deviations from neutral evolution.
+#'
+#' @param vfile A character string representing the path to the VCF file to be analyzed.
+#' @param window_size An integer specifying the size of the genomic window (in base pairs) for analysis. The default is set to 150,000.
+#' @param nsample An integer specifying the number of samples used in calculations. Default is set to 1.
+#'
+#' @return A data frame containing the calculated Tajima's D for each window, along with the number of SNPs, 
+#'         Waterson's Theta, nucleotide diversity (Pi), variance of derived counts, and additional statistics.
+#'
+#' @details The function reads a VCF file, processes SNP data to create genomic windows, and calculates various 
+#'          statistics including Tajima's D. It employs the following calculations:
+#'          - Waterson's Theta: \eqn{\Theta_W = \frac{S}{\sum_{i=1}^{2N-1} \frac{1}{i}}}
+#'          - Nucleotide diversity (Pi): \eqn{\Pi = \frac{1}{2N(N-1)} \sum \frac{(2*J*(C-J))}{(C*(C-1))}}
+#'          - Variance of derived counts: \eqn{Var(d)} calculated through a custom function.
+#'          - Tajima's D: \eqn{D = \frac{\Pi - \Theta_W}{\sqrt{Var(d)}}}
+#'
+#' @note The input VCF file must be in a valid format, and the function requires the `vcfR` and `dplyr` packages for data manipulation.
+#'
+#' @examples
+#' # Example usage:
+#' tajima_results <- TajimaD("path/to/sample.vcf", window_size = 150000, nsample = 10)
+#'
+#' # Output: A data frame with Tajima's D calculations for each window
+#'
+#' @export
 
 TajimaD <- function(vfile=file, window_size=150000, nsample=1){
   vcf <- read.vcfR(vfile)
