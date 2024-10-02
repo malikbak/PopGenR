@@ -11,3 +11,4 @@ Encoding: UTF-8
 LazyData: true
 Depends: R (>= 4.0.0)
 Imports: vcfR, ggplot2, data.table, dplyr
+RoxygenNote: 7.3.2
