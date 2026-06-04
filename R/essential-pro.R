@@ -29,8 +29,15 @@
 #'
 #' @export
 allele.freq <- function(genotypeCounts) {
-  n = sum(genotypeCounts) - genotypeCounts["NN"]
-  p = ((2*genotypeCounts["AA"]) + genotypeCounts["Aa"])/(2*n)
+  counts <- genotypeCounts[c("AA", "Aa", "aa", "NN")]
+  counts[is.na(counts)] <- 0
+  n = sum(counts[c("AA", "Aa", "aa")])
+  if (n == 0) {
+    freqs <- c(NA_real_, NA_real_)
+    names(freqs) <- c("p", "q")
+    return(freqs)
+  }
+  p = ((2*counts["AA"]) + counts["Aa"])/(2*n)
   q = 1-p
   freqs = c(p,q)
   names(freqs) = c("p", "q")
@@ -38,14 +45,14 @@ allele.freq <- function(genotypeCounts) {
 }
 #' calc_r2: Calculate Linkage Disequilibrium (R²) Between Two Variants
 #'
-#' This function calculates the linkage disequilibrium (LD) measure, \(R^2\), between two genetic variants based on their genotypes. The function uses the allele frequencies of the two variants and their haplotype frequencies to compute \(R^2\), which quantifies the non-random association of alleles at two loci.
+#' This function calculates the linkage disequilibrium (LD) measure, \eqn{R^2}, between two genetic variants based on their genotypes. The function uses the allele frequencies of the two variants and their haplotype frequencies to compute \eqn{R^2}, which quantifies the non-random association of alleles at two loci.
 #'
 #' @param row1 A vector representing the first variant, where the first 9 columns contain metadata and the genotype data starts from the 10th column onward.
 #' @param row2 A vector representing the second variant, structured similarly to `row1`, where the genotype data starts from the 10th column.
 #'
-#' @return A numeric value representing the \(R^2\) value between the two variants, which measures the degree of linkage disequilibrium between them.
+#' @return A numeric value representing the \eqn{R^2} value between the two variants, which measures the degree of linkage disequilibrium between them.
 #'
-#' @details The function extracts the genotypes (`GT`) for both variants using the helper function `get.field`, which parses the genotype data from the variant vectors. It then calculates the allele frequencies `pA` and `pB` for both variants using the `allele.freq` function. The haplotype frequencies are determined using the `get.haplotypes` function, and from this, the \(R^2\) value is calculated using the formula:
+#' @details The function extracts the genotypes (`GT`) for both variants using the helper function `get.field`, which parses the genotype data from the variant vectors. It then calculates the allele frequencies `pA` and `pB` for both variants using the `allele.freq` function. The haplotype frequencies are determined using the `get.haplotypes` function, and from this, the \eqn{R^2} value is calculated using the formula:
 #' 
 #' \deqn{D = p_{AB} - (p_A \times p_B)}
 #' \deqn{R^2 = \frac{D^2}{p_A \times (1 - p_A) \times p_B \times (1 - p_B)}}
@@ -54,8 +61,8 @@ allele.freq <- function(genotypeCounts) {
 #'
 #' @examples
 #' # Example usage:
-#' variant1 <- c("chr1", "12345", "A", "T", "...", "...", "...", "...", "...", "0/0", "0/1", "1/1")
-#' variant2 <- c("chr1", "67890", "G", "C", "...", "...", "...", "...", "...", "0/0", "0/1", "1/1")
+#' variant1 <- c("chr1", "12345", ".", "A", "T", ".", "PASS", ".", "GT", "0/0", "0/1", "1/1")
+#' variant2 <- c("chr1", "67890", ".", "G", "C", ".", "PASS", ".", "GT", "0/0", "0/1", "1/1")
 #' r2_value <- calc_r2(variant1, variant2)
 #'
 #' @export
@@ -114,7 +121,7 @@ count.genotypes <- function(genotypes) {
 #'
 #' @examples
 #' # Example usage:
-#' variant <- c("chr1", "12345", "A", "T", "...", "...", "...", "...", "...", "0/0", "0/1", "1/1")
+#' variant <- c("chr1", "12345", ".", "A", "T", ".", "PASS", ".", "GT", "0/0", "0/1", "1/1")
 #' derived_allele_count <- derivedCount(variant)
 #'
 #' @export
@@ -126,27 +133,29 @@ derivedCount <- function(row) {
 }
 #' dnuc: Calculate Nucleotide Diversity (Dxy) Between Two Populations
 #'
-#' This function calculates the nucleotide diversity (\(D_{xy}\)) between two populations using allele frequencies from two variant call format (VCF) datasets. The measure quantifies the average number of nucleotide substitutions per site between two populations.
+#' This function calculates the nucleotide diversity \eqn{D_{xy}} between two populations using allele frequencies from two variant call format (VCF) datasets. The measure quantifies the average number of nucleotide substitutions per site between two populations.
 #'
 #' @param vcf1 A data frame representing the VCF data for the first population, where the first 9 columns contain metadata, and the genotype data starts from the 10th column.
 #' @param vcf2 A data frame representing the VCF data for the second population, structured similarly to `vcf1`.
-#' @param perBP A logical value indicating whether to normalize \(D_{xy}\) per base pair (bp). If `TRUE`, the function divides the \(D_{xy}\) value by the total base pairs between the start and end positions in `vcf1`. Default is `TRUE`.
+#' @param perBP A logical value indicating whether to normalize \eqn{D_{xy}} per base pair (bp). If `TRUE`, the function divides the \eqn{D_{xy}} value by the total base pairs between the start and end positions in `vcf1`. Default is `TRUE`.
 #'
-#' @return A numeric value representing the \(D_{xy}\) value. If `perBP` is `TRUE`, the value is normalized per base pair, otherwise it returns the raw \(D_{xy}\) value.
+#' @return A numeric value representing the \eqn{D_{xy}} value. If `perBP` is `TRUE`, the value is normalized per base pair, otherwise it returns the raw \eqn{D_{xy}} value.
 #'
-#' @details The function works by first extracting the genotype data (`GT`) from the VCF files using the `get.field` function. It then calculates the allele frequencies (`p`) for each variant in both populations using `allele.freq`. The \(D_{xy}\) measure is computed using the formula:
+#' @details The function works by first extracting the genotype data (`GT`) from the VCF files using the `get.field` function. It then calculates the allele frequencies (`p`) for each variant in both populations using `allele.freq`. The \eqn{D_{xy}} measure is computed using the formula:
 #' 
 #' \deqn{D_{xy} = \sum{p_1(1 - p_2) + p_2(1 - p_1)}}
 #' 
-#' Where \(p_1\) and \(p_2\) are the allele frequencies in population 1 and population 2, respectively. If `perBP` is `TRUE`, the function calculates the total number of base pairs covered by the variants and returns \(D_{xy}\) normalized by this number.
+#' Where \eqn{p_1} and \eqn{p_2} are the allele frequencies in population 1 and population 2, respectively. If `perBP` is `TRUE`, the function calculates the total number of base pairs covered by the variants and returns \eqn{D_{xy}} normalized by this number.
 #'
 #' @note The `get.field` and `allele.freq` functions must be defined or available in the user's environment for this function to work.
 #'
 #' @examples
 #' # Example usage:
+#' \dontrun{
 #' vcf1 <- read.vcf("population1.vcf")
 #' vcf2 <- read.vcf("population2.vcf")
 #' dxy_value <- dnuc(vcf1, vcf2, perBP = TRUE)
+#' }
 #'
 #' @export
 dnuc <- function(vcf1, vcf2, perBP=TRUE) {
@@ -217,9 +226,11 @@ expected.het <- function(genotypes) {
 #'
 #' @examples
 #' # Example usage:
+#' \dontrun{
 #' vcf1 <- read.vcf("population1.vcf")
 #' vcf2 <- read.vcf("population2.vcf")
 #' result <- fixed.poly(vcf1, vcf2)
+#' }
 #'
 #' # Output: A vector indicating "Fixed" or "Polymorphic" for each site
 #'
@@ -286,8 +297,11 @@ get.field <- function(samples, format, fieldName) {
 #'
 #' @export
 get.haplotypes <- function(genotypes1, genotypes2) {
-  a1 = gsub("\\|", "", genotypes1) 
-  a2 = gsub("\\|", "", genotypes2)
+  if (length(genotypes1) != length(genotypes2)) {
+    stop("`genotypes1` and `genotypes2` must have the same length.", call. = FALSE)
+  }
+  a1 = gsub("(\\||/)", "", genotypes1) 
+  a2 = gsub("(\\||/)", "", genotypes2)
   a1=unlist(strsplit(paste0(a1, collapse=""), split="")) 
   a2=unlist(strsplit(paste0(a2, collapse=""), split=""))
   haps = paste0(a1,a2)
@@ -332,14 +346,16 @@ maf <- function(vcf.row) {
 #' 
 #' \deqn{\pi = \frac{1}{N(N-1)} \sum_{i=1}^{S} J_i (C - J_i)}
 #' 
-#' where \( J \) is the derived count, and \( N \) is the total number of alleles. If `perBP` is set to `TRUE`, the function normalizes the result by the total number of base pairs across all chromosomes.
+#' where \eqn{J} is the derived count, and \eqn{N} is the total number of alleles. If `perBP` is set to `TRUE`, the function normalizes the result by the total number of base pairs across all chromosomes.
 #'
 #' @note The `derivedCount`, `count.genotypes`, and other necessary functions must be available in the user's environment for this function to work properly.
 #'
 #' @examples
 #' # Example usage:
+#' \dontrun{
 #' vcf_data <- read.vcf("sample.vcf")
 #' nucleotide_diversity <- pi.diversity(vcf_data, perBP = TRUE)
+#' }
 #'
 #' # Output: A numeric value representing nucleotide diversity normalized by base pairs
 #'
@@ -373,17 +389,18 @@ pi.diversity <- function(vcf, perBP=TRUE) {
 #'
 #' @examples
 #' # Example usage:
+#' \dontrun{
 #' vcf_data <- read.vcf("path/to/sample.vcf")
+#' }
 #'
 #' # Output: A data frame representing the cleaned VCF data
 #'
 #' @export
 read.vcf <- function(file, special.char="##", ...) {
-  my.search.term=paste0(special.char, ".*")
-  all.lines=readLines(file)
-  clean.lines=gsub(my.search.term, "",  all.lines)
-  clean.lines=gsub("#CHROM", "CHROM", clean.lines)
-  read.table(..., text=paste(clean.lines, collapse="\n"))
+  all.lines=readLines(file, warn = FALSE)
+  clean.lines=all.lines[!startsWith(all.lines, special.char)]
+  clean.lines=sub("^#CHROM", "CHROM", clean.lines)
+  utils::read.table(..., text=paste(clean.lines, collapse="\n"), header = TRUE)
 }
 #' variance.d: Calculate Variance of the Genetic Diversity Index (D)
 #'
@@ -399,11 +416,11 @@ read.vcf <- function(file, special.char="##", ...) {
 #' \deqn{a1 = \sum_{i=1}^{n-1} \frac{1}{i}}
 #' \deqn{a2 = \sum_{i=1}^{n-1} \frac{1}{i^2}}
 #' 
-#' Then it calculates coefficients \(b1\), \(b2\), \(c1\), and \(c2\) based on these sums, and finally computes the variance using:
+#' Then it calculates coefficients \eqn{b1}, \eqn{b2}, \eqn{c1}, and \eqn{c2} based on these sums, and finally computes the variance using:
 #' 
 #' \deqn{var = e1 \cdot S + e2 \cdot S \cdot (S - 1)}
 #'
-#' where \(e1\) and \(e2\) are derived from \(c1\) and \(c2\).
+#' where \eqn{e1} and \eqn{e2} are derived from \eqn{c1} and \eqn{c2}.
 #'
 #' @note This function assumes that the input values are valid and that the calculations adhere to the statistical properties of genetic diversity.
 #'
@@ -430,25 +447,27 @@ variance.d <- function(n,S) {
 }
 #' waterson.theta: Calculate Watterson's Theta from Genetic Data
 #'
-#' This function calculates Watterson's Theta (\(\theta\)), a measure of nucleotide diversity, based on the number of segregating sites in a given dataset. It can be normalized by the number of base pairs.
+#' This function calculates Watterson's Theta \eqn{\theta}, a measure of nucleotide diversity, based on the number of segregating sites in a given dataset. It can be normalized by the number of base pairs.
 #'
 #' @param data A data frame containing genetic data in VCF format, where the first 9 columns contain metadata and genotype data starts from the 10th column.
 #' @param perBP A logical value indicating whether to normalize Watterson's Theta by the number of base pairs. If `TRUE`, the result is divided by the total number of base pairs; if `FALSE`, the raw value is returned.
 #'
 #' @return A numeric value representing Watterson's Theta. If `perBP` is `TRUE`, the result is normalized by the number of base pairs.
 #'
-#' @details The function calculates the number of segregating sites (\(S_n\)) in the data that have a minor allele frequency greater than zero. It then uses the formula:
+#' @details The function calculates the number of segregating sites \eqn{S_n} in the data that have a minor allele frequency greater than zero. It then uses the formula:
 #' 
 #' \deqn{\theta = \frac{S_n}{\sum_{i=1}^{2N-1} \frac{1}{i}}}
 #' 
-#' where \(N\) is the number of individuals in the sample. If `perBP` is set to `TRUE`, the result is normalized by the number of base pairs in the dataset.
+#' where \eqn{N} is the number of individuals in the sample. If `perBP` is set to `TRUE`, the result is normalized by the number of base pairs in the dataset.
 #'
 #' @note The `maf` function must be available in the user's environment for this function to work correctly.
 #'
 #' @examples
 #' # Example usage:
+#' \dontrun{
 #' vcf_data <- read.vcf("path/to/sample.vcf")
 #' watterson_theta <- waterson.theta(vcf_data, perBP = TRUE)
+#' }
 #'
 #' # Output: A numeric value representing Watterson's Theta normalized by base pairs
 #'

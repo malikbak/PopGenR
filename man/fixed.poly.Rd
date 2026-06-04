@@ -25,9 +25,11 @@ The `get.field`, `allele.freq`, and `count.genotypes` functions must be availabl
 }
 \examples{
 # Example usage:
+\dontrun{
 vcf1 <- read.vcf("population1.vcf")
 vcf2 <- read.vcf("population2.vcf")
 result <- fixed.poly(vcf1, vcf2)
+}
 
 # Output: A vector indicating "Fixed" or "Polymorphic" for each site
 

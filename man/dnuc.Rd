@@ -11,28 +11,30 @@ dnuc(vcf1, vcf2, perBP = TRUE)
 
 \item{vcf2}{A data frame representing the VCF data for the second population, structured similarly to `vcf1`.}
 
-\item{perBP}{A logical value indicating whether to normalize \(D_{xy}\) per base pair (bp). If `TRUE`, the function divides the \(D_{xy}\) value by the total base pairs between the start and end positions in `vcf1`. Default is `TRUE`.}
+\item{perBP}{A logical value indicating whether to normalize \eqn{D_{xy}} per base pair (bp). If `TRUE`, the function divides the \eqn{D_{xy}} value by the total base pairs between the start and end positions in `vcf1`. Default is `TRUE`.}
 }
 \value{
-A numeric value representing the \(D_{xy}\) value. If `perBP` is `TRUE`, the value is normalized per base pair, otherwise it returns the raw \(D_{xy}\) value.
+A numeric value representing the \eqn{D_{xy}} value. If `perBP` is `TRUE`, the value is normalized per base pair, otherwise it returns the raw \eqn{D_{xy}} value.
 }
 \description{
-This function calculates the nucleotide diversity (\(D_{xy}\)) between two populations using allele frequencies from two variant call format (VCF) datasets. The measure quantifies the average number of nucleotide substitutions per site between two populations.
+This function calculates the nucleotide diversity \eqn{D_{xy}} between two populations using allele frequencies from two variant call format (VCF) datasets. The measure quantifies the average number of nucleotide substitutions per site between two populations.
 }
 \details{
-The function works by first extracting the genotype data (`GT`) from the VCF files using the `get.field` function. It then calculates the allele frequencies (`p`) for each variant in both populations using `allele.freq`. The \(D_{xy}\) measure is computed using the formula:
+The function works by first extracting the genotype data (`GT`) from the VCF files using the `get.field` function. It then calculates the allele frequencies (`p`) for each variant in both populations using `allele.freq`. The \eqn{D_{xy}} measure is computed using the formula:
 
 \deqn{D_{xy} = \sum{p_1(1 - p_2) + p_2(1 - p_1)}}
 
-Where \(p_1\) and \(p_2\) are the allele frequencies in population 1 and population 2, respectively. If `perBP` is `TRUE`, the function calculates the total number of base pairs covered by the variants and returns \(D_{xy}\) normalized by this number.
+Where \eqn{p_1} and \eqn{p_2} are the allele frequencies in population 1 and population 2, respectively. If `perBP` is `TRUE`, the function calculates the total number of base pairs covered by the variants and returns \eqn{D_{xy}} normalized by this number.
 }
 \note{
 The `get.field` and `allele.freq` functions must be defined or available in the user's environment for this function to work.
 }
 \examples{
 # Example usage:
+\dontrun{
 vcf1 <- read.vcf("population1.vcf")
 vcf2 <- read.vcf("population2.vcf")
 dxy_value <- dnuc(vcf1, vcf2, perBP = TRUE)
+}
 
 }

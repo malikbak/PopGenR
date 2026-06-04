@@ -2,42 +2,45 @@
 % Please edit documentation in R/plQC.R
 \name{plQC}
 \alias{plQC}
-\title{Perform Quality Control and PCA Analysis using PLINK}
+\title{Run PLINK Quality Control and Plot PCA}
 \usage{
-plQC(file = file, maf = 0.05, gen = 0.1, mind = 0.1, hwe = 1e-06, chrset = 22)
+plQC(
+  file,
+  maf = 0.05,
+  gen = 0.1,
+  mind = 0.1,
+  hwe = 1e-06,
+  chrset = 22,
+  plink_path = NULL
+)
 }
 \arguments{
-\item{file}{A character string specifying the path to the input file (without extension). The function accepts both 
-`.ped` and `.bed` file formats.}
+\item{file}{Input PLINK file prefix, without `.ped` or `.bed`.}
 
-\item{maf}{A numeric value representing the minor allele frequency threshold for filtering. Default is 0.05.}
+\item{maf}{Minor allele frequency threshold.}
 
-\item{gen}{A numeric value representing the genotype missingness threshold. Default is 0.1.}
+\item{gen}{Variant missingness threshold passed to PLINK `--geno`.}
 
-\item{mind}{A numeric value representing the individual missingness threshold. Default is 0.1.}
+\item{mind}{Individual missingness threshold passed to PLINK `--mind`.}
 
-\item{hwe}{A numeric value representing the p-value threshold for Hardy-Weinberg equilibrium test. Default is 1e-6.}
+\item{hwe}{Hardy-Weinberg equilibrium p-value threshold.}
 
-\item{chrset}{An integer representing the chromosome set to be analyzed. Default is 22.}
+\item{chrset}{Number of chromosomes passed to PLINK `--chr-set`.}
+
+\item{plink_path}{Optional path to a PLINK executable. When omitted, the
+function looks for a package/local development copy and then for `plink`
+on the system path.}
 }
 \value{
-A PCA plot showing the first two principal components (PC1 and PC2) of the filtered genotype data.
+A `ggplot` object. PLINK output files are written to the current
+  working directory.
 }
 \description{
-This function performs quality control (QC) on genetic data using PLINK and calculates principal components 
-for the provided genotype data. It generates a PCA plot based on the resulting principal components.
-}
-\details{
-The function uses the PLINK tool to perform QC filtering on the input genetic data and calculates 
-         the principal components. The PCA plot visualizes the distribution of the samples based on the first 
-         two principal components, highlighting potential clusters or outliers in the data.
-}
-\note{
-Ensure that the PLINK executable is accessible at the specified path in the `extdata/plink/` directory.
-      The input files must be in the correct format, and the function assumes the presence of `ggplot2` for plotting.
+Filter genotype data with PLINK and plot the first two principal components.
 }
 \examples{
-# Example usage:
-plQC(file = "path/to/data", maf = 0.05, gen = 0.1, mind = 0.1, hwe = 1e-6, chrset = 22)
+\dontrun{
+plQC(file = "data/my_genotypes", maf = 0.05, chrset = 30)
+}
 
 }

@@ -27,7 +27,9 @@ The input file must be a valid VCF file. The function assumes that the format of
 }
 \examples{
 # Example usage:
+\dontrun{
 vcf_data <- read.vcf("path/to/sample.vcf")
+}
 
 # Output: A data frame representing the cleaned VCF data
 

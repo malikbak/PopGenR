@@ -23,11 +23,11 @@ The function uses the following formulas to compute the variance:
 \deqn{a1 = \sum_{i=1}^{n-1} \frac{1}{i}}
 \deqn{a2 = \sum_{i=1}^{n-1} \frac{1}{i^2}}
 
-Then it calculates coefficients \(b1\), \(b2\), \(c1\), and \(c2\) based on these sums, and finally computes the variance using:
+Then it calculates coefficients \eqn{b1}, \eqn{b2}, \eqn{c1}, and \eqn{c2} based on these sums, and finally computes the variance using:
 
 \deqn{var = e1 \cdot S + e2 \cdot S \cdot (S - 1)}
 
-where \(e1\) and \(e2\) are derived from \(c1\) and \(c2\).
+where \eqn{e1} and \eqn{e2} are derived from \eqn{c1} and \eqn{c2}.
 }
 \note{
 This function assumes that the input values are valid and that the calculations adhere to the statistical properties of genetic diversity.

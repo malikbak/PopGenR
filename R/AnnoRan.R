@@ -1,149 +1,141 @@
-#' AnnoRan: Annotate Regions of Homozygosity (ROH) Based on Genomic Annotations
+#' Annotate Genomic Regions with Gene Names
 #'
-#' This function annotates genomic ranges within a dataset by matching them with corresponding gene annotations. 
-#' It is designed to work with a data frame containing regions of homozygosity (ROH) and a genomic annotation 
-#' file or data frame.
+#' Match genomic intervals, such as runs of homozygosity, to gene annotations.
 #'
-#' @param data A data frame containing the regions to be annotated. This should include columns for chromosome 
-#' identifier, start position, and end position.
-#' @param CHR A character string or numeric value specifying the column in `data` representing the chromosome.
-#' @param starP A character string or numeric value specifying the column in `data` representing the start 
-#' position of the regions.
-#' @param endP A character string or numeric value specifying the column in `data` representing the end position 
-#' of the regions.
-#' @param annotation A file path to a GFF/GTF file or a data frame containing gene annotations. If a character 
-#' path is provided, the function will read the GFF file using `rtracklayer::readGFF`. The data frame or file 
-#' should include columns for chromosome name, start position, end position, and gene name.
+#' @param data A data frame containing the regions to annotate.
+#' @param CHR Column name or index in `data` containing chromosome identifiers.
+#' @param starP Column name or index in `data` containing region start positions.
+#' @param endP Column name or index in `data` containing region end positions.
+#' @param annotation Either a data frame of gene annotations or a path to a
+#'   GFF/GTF file. Data frames should contain `chromosome_name`,
+#'   `start_position`, `end_position`, and `external_gene_name`.
 #'
-#' @return A data frame that includes the original regions along with an additional column, `Matching_Names`, 
-#' which contains the gene names corresponding to the genomic regions.
+#' @return A data frame with `ID`, `Range`, and `Matching_Names`. `Matching_Names`
+#'   contains comma-separated gene names fully contained within each region, or
+#'   `"NA"` when no annotation overlaps.
 #'
-#' @details The function works by first creating a new column, `region`, in the input `data` that combines the 
-#' start and end positions into a string format. It then matches these ranges with the gene annotations provided 
-#' via the `annotation` argument. If a match is found, the gene names are retrieved and associated with the 
-#' respective regions. If no match is found, "NA" is assigned.
-#'
-#' @note The function supports annotations provided either as a file in GFF/GTF format or as a data frame. It 
-#' expects the annotation data frame to have specific column names, such as `chromosome_name`, `start_position`, 
-#' `end_position`, and `external_gene_name` (or equivalent).
-#'
-#' @importFrom rtracklayer readGFF
 #' @examples
-#' # Example usage with data frame and GFF file:
-#' ROH_data <- data.frame(chr = c("1", "1"), start = c(1000, 5000), end = c(2000, 6000))
-#' annotation_file <- "path/to/annotation.gff"
-#' annotated_data <- AnnoRan(data = ROH_data, CHR = "chr", starP = "start", endP = "end", annotation = annotation_file)
-#'
-#' # Example usage with data frames:
-#' annotation_df <- data.frame(chromosome_name = c("1", "1"), start_position = c(1500, 5500), 
-#'                             end_position = c(1800, 5800), external_gene_name = c("Gene1", "Gene2"))
-#' annotated_data <- AnnoRan(data = ROH_data, CHR = "chr", starP = "start", endP = "end", annotation = annotation_df)
+#' regions <- data.frame(chr = c("1", "1"), start = c(1000, 5000), end = c(2000, 6500))
+#' genes <- data.frame(
+#'   chromosome_name = c("1", "1"),
+#'   start_position = c(1200, 5500),
+#'   end_position = c(1800, 6000),
+#'   external_gene_name = c("GeneA", "GeneB")
+#' )
+#' AnnoRan(regions, CHR = "chr", starP = "start", endP = "end", annotation = genes)
 #'
 #' @export
-AnnoRan <- function(data = data, CHR = chrcol, starP = starP, endP = endP, annotation = Anofile){
-  ROH_test <- data
-  ROH_test$region <- paste(ROH_test[,starP], ROH_test[,endP], sep = "-")
-  # Sample data frame with ranges
-  df_ranges <- data.frame(ID = ROH_test[,CHR],
-                          Range = ROH_test$region)
-  
-  # Sample data frame with start, end, and name columns
-  if(class(annotation) == "data.frame"){
-    if("chromosome_name" %in% colnames(annotation)){
-      df_data <- data.frame(ID = annotation[,"chromosome_name"],
-                            Start = annotation[,"start_position"],
-                            End = annotation[,"end_position"],
-                            Name = annotation[,"external_gene_name"])
-    }
-  }else if(class(annotation) == "character"){
-    annotation <- rtracklayer::readGFF(annotation)
-    annotation <- as.data.frame(annotation)
-    df_data <- data.frame(ID = annotation[,"seqid"],
-                          Start = annotation[,"start"],
-                          End = annotation[,"end"],
-                          Name = annotation[,"Name"])
+AnnoRan <- function(data, CHR, starP, endP, annotation) {
+  if (!is.data.frame(data)) {
+    stop("`data` must be a data frame.", call. = FALSE)
   }
-  
-  # Function to match ranges and retrieve corresponding names
-  match_ranges <- function(id, range_str, start_values, end_values, names, data_ids) {
-    matched_names <- character(length(id))
-    
-    for (i in seq_along(id)) {
-      # Find the index of the matching ID
-      match_index <- which(id[i] == data_ids)
-      
-      # Filter the data frame based on the matching ID
-      filtered_data <- df_data[df_data$ID == id[i], ]
-      
-      # Convert range string to start and end values
-      range_parts <- strsplit(range_str[i], "-")
-      range_start <- as.numeric(range_parts[[1]][1])
-      range_end <- as.numeric(range_parts[[1]][2])
-      
-      # Find indices of matching ranges within the filtered data frame
-      range_indices <- which(filtered_data$Start >= range_start & filtered_data$End <= range_end)
-      
-      if (length(range_indices) > 0) {
-        # Retrieve corresponding names
-        matched_names[i] <- paste(filtered_data$Name[range_indices], collapse = ",")
-      } else {
-        # Assign NA if no match found
-        matched_names[i] <- NA_character_
-      }
+
+  region_data <- data.frame(
+    ID = data[[CHR]],
+    Start = as.numeric(data[[starP]]),
+    End = as.numeric(data[[endP]])
+  )
+  region_data$Range <- paste(region_data$Start, region_data$End, sep = "-")
+
+  if (is.data.frame(annotation)) {
+    required <- c("chromosome_name", "start_position", "end_position", "external_gene_name")
+    missing_cols <- setdiff(required, names(annotation))
+    if (length(missing_cols) > 0) {
+      stop("`annotation` is missing columns: ", paste(missing_cols, collapse = ", "), call. = FALSE)
     }
-    
-    matched_names
+
+    gene_data <- data.frame(
+      ID = annotation$chromosome_name,
+      Start = as.numeric(annotation$start_position),
+      End = as.numeric(annotation$end_position),
+      Name = annotation$external_gene_name
+    )
+  } else if (is.character(annotation) && length(annotation) == 1) {
+    if (!requireNamespace("rtracklayer", quietly = TRUE)) {
+      stop("Install the `rtracklayer` package to read GFF/GTF annotation files.", call. = FALSE)
+    }
+
+    gff <- as.data.frame(rtracklayer::readGFF(annotation))
+    name_col <- if ("Name" %in% names(gff)) "Name" else if ("gene_name" %in% names(gff)) "gene_name" else NA_character_
+    if (is.na(name_col)) {
+      stop("The annotation file must contain a `Name` or `gene_name` column.", call. = FALSE)
+    }
+
+    gene_data <- data.frame(
+      ID = gff$seqid,
+      Start = as.numeric(gff$start),
+      End = as.numeric(gff$end),
+      Name = gff[[name_col]]
+    )
+  } else {
+    stop("`annotation` must be a data frame or a single file path.", call. = FALSE)
   }
-  
-  # Get the IDs from df_data
-  data_ids <- df_data$ID
-  
-  # Apply the function to each row in df_ranges
-  df_ranges$Matching_Names <- match_ranges(df_ranges$ID, df_ranges$Range, df_data$Start, df_data$End, df_data$Name, data_ids)
-  
-  # Convert NA values to character "NA"
-  df_ranges$Matching_Names <- ifelse(is.na(df_ranges$Matching_Names), "NA", df_ranges$Matching_Names)
-  return(df_ranges)
+
+  matches <- vapply(seq_len(nrow(region_data)), function(i) {
+    hit <- gene_data$ID == region_data$ID[i] &
+      gene_data$Start >= region_data$Start[i] &
+      gene_data$End <= region_data$End[i]
+
+    if (any(hit)) {
+      paste(unique(gene_data$Name[hit]), collapse = ",")
+    } else {
+      "NA"
+    }
+  }, character(1))
+
+  data.frame(
+    ID = region_data$ID,
+    Range = region_data$Range,
+    Matching_Names = matches,
+    stringsAsFactors = FALSE
+  )
 }
 
-#' AnnoSin: Single-Position Annotation Based on Genomic Annotations
+#' Annotate Single Genomic Positions with Gene Names
 #'
-#' This function annotates individual genomic positions within a dataset by matching them with corresponding gene 
-#' annotations. It takes a data frame with genomic positions and annotates them using an external annotation file 
-#' or data frame.
+#' Match SNP or marker positions to gene annotations.
 #'
-#' @param data A data frame containing the genomic positions to be annotated. This should include columns for 
-#' chromosome (`CHR`) and position (`POSITION`).
-#' @param annotation A data frame containing gene annotations. The annotation data frame must include columns 
-#' for `chromosome_name`, `start_position`, `end_position`, and `external_gene_name`.
+#' @param data A data frame with `CHR` and `POSITION` columns.
+#' @param annotation A data frame with `chromosome_name`, `start_position`,
+#'   `end_position`, and `external_gene_name` columns.
 #'
-#' @return A data frame that includes the original positions along with an additional column, `external_gene_name`, 
-#' containing the gene name corresponding to each position.
-#'
-#' @details The function uses the `POSITION` and `CHR` columns from the input `data` to find the corresponding 
-#' gene name in the `annotation` data frame. For each position, it checks whether the position lies within the 
-#' start and end coordinates of a gene in the specified chromosome. If a match is found, the corresponding gene 
-#' name is assigned; otherwise, `NA` is returned.
-#'
-#' @note The function expects the `annotation` data frame to contain specific columns: `chromosome_name`, 
-#' `start_position`, `end_position`, and `external_gene_name`.
-#'
-#' @importFrom dplyr mutate
-#' @importFrom purrr map2_chr
+#' @return The input data with an added `external_gene_name` column.
 #'
 #' @examples
-#' # Example usage:
-#' positions_data <- data.frame(CHR = c("1", "2"), POSITION = c(1500, 6000))
-#' annotation_df <- data.frame(chromosome_name = c("1", "2"), start_position = c(1000, 5000), 
-#'                             end_position = c(2000, 6500), external_gene_name = c("GeneA", "GeneB"))
-#' annotated_data <- AnnoSin(data = positions_data, annotation = annotation_df)
+#' positions <- data.frame(CHR = c("1", "2"), POSITION = c(1500, 6000))
+#' genes <- data.frame(
+#'   chromosome_name = c("1", "2"),
+#'   start_position = c(1000, 5000),
+#'   end_position = c(2000, 6500),
+#'   external_gene_name = c("GeneA", "GeneB")
+#' )
+#' AnnoSin(positions, genes)
 #'
 #' @export
-AnnoSin <- function(data=data,annotation=annotation){
-  data_gene <- data %>%
-    mutate(external_gene_name = map2_chr(POSITION, CHR, function(x, y) {
-      inds = x >= annotation$start_position & x <= annotation$end_position & y == annotation$chromosome_name
-      if (any(inds)) annotation$external_gene_name[which.max(inds)] else NA
-    }))
-  return(data_gene)
+AnnoSin <- function(data, annotation) {
+  required_data <- c("CHR", "POSITION")
+  required_annotation <- c("chromosome_name", "start_position", "end_position", "external_gene_name")
+
+  if (!all(required_data %in% names(data))) {
+    stop("`data` must contain CHR and POSITION columns.", call. = FALSE)
+  }
+
+  missing_cols <- setdiff(required_annotation, names(annotation))
+  if (length(missing_cols) > 0) {
+    stop("`annotation` is missing columns: ", paste(missing_cols, collapse = ", "), call. = FALSE)
+  }
+
+  data$external_gene_name <- vapply(seq_len(nrow(data)), function(i) {
+    hit <- data$POSITION[i] >= annotation$start_position &
+      data$POSITION[i] <= annotation$end_position &
+      data$CHR[i] == annotation$chromosome_name
+
+    if (any(hit)) {
+      annotation$external_gene_name[which(hit)[1]]
+    } else {
+      NA_character_
+    }
+  }, character(1))
+
+  data
 }

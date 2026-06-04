@@ -15,22 +15,24 @@ waterson.theta(data, perBP = TRUE)
 A numeric value representing Watterson's Theta. If `perBP` is `TRUE`, the result is normalized by the number of base pairs.
 }
 \description{
-This function calculates Watterson's Theta (\(\theta\)), a measure of nucleotide diversity, based on the number of segregating sites in a given dataset. It can be normalized by the number of base pairs.
+This function calculates Watterson's Theta \eqn{\theta}, a measure of nucleotide diversity, based on the number of segregating sites in a given dataset. It can be normalized by the number of base pairs.
 }
 \details{
-The function calculates the number of segregating sites (\(S_n\)) in the data that have a minor allele frequency greater than zero. It then uses the formula:
+The function calculates the number of segregating sites \eqn{S_n} in the data that have a minor allele frequency greater than zero. It then uses the formula:
 
 \deqn{\theta = \frac{S_n}{\sum_{i=1}^{2N-1} \frac{1}{i}}}
 
-where \(N\) is the number of individuals in the sample. If `perBP` is set to `TRUE`, the result is normalized by the number of base pairs in the dataset.
+where \eqn{N} is the number of individuals in the sample. If `perBP` is set to `TRUE`, the result is normalized by the number of base pairs in the dataset.
 }
 \note{
 The `maf` function must be available in the user's environment for this function to work correctly.
 }
 \examples{
 # Example usage:
+\dontrun{
 vcf_data <- read.vcf("path/to/sample.vcf")
 watterson_theta <- waterson.theta(vcf_data, perBP = TRUE)
+}
 
 # Output: A numeric value representing Watterson's Theta normalized by base pairs
 

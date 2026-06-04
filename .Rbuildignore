@@ -1,0 +1,10 @@
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^PopGenR\.Rproj$
+^PopGenR-manual\.pdf$
+^\.git$
+^\.\.Rcheck$
+^PopGenR_[0-9.]+\.tar\.gz$
+^PopGenR\.Rcheck$
+^extdata/plink/plink\.exe$

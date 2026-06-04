@@ -1,0 +1,11 @@
+utils::globalVariables(c(
+  ".",
+  "Ref",
+  "V3",
+  "V4",
+  "chr",
+  "count",
+  "end",
+  "position",
+  "start"
+))

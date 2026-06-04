@@ -22,15 +22,17 @@ The function computes the derived count for each site using the `derivedCount` f
 
 \deqn{\pi = \frac{1}{N(N-1)} \sum_{i=1}^{S} J_i (C - J_i)}
 
-where \( J \) is the derived count, and \( N \) is the total number of alleles. If `perBP` is set to `TRUE`, the function normalizes the result by the total number of base pairs across all chromosomes.
+where \eqn{J} is the derived count, and \eqn{N} is the total number of alleles. If `perBP` is set to `TRUE`, the function normalizes the result by the total number of base pairs across all chromosomes.
 }
 \note{
 The `derivedCount`, `count.genotypes`, and other necessary functions must be available in the user's environment for this function to work properly.
 }
 \examples{
 # Example usage:
+\dontrun{
 vcf_data <- read.vcf("sample.vcf")
 nucleotide_diversity <- pi.diversity(vcf_data, perBP = TRUE)
+}
 
 # Output: A numeric value representing nucleotide diversity normalized by base pairs
 

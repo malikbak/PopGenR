@@ -2,35 +2,26 @@
 % Please edit documentation in R/Hp.R
 \name{Hetp}
 \alias{Hetp}
-\title{Hetp: Calculate pooled Heterozygosity Per Window from VCF Data}
+\title{Calculate Pooled Heterozygosity by Genomic Window}
 \usage{
-Hetp(vcf_file = vcf_file, window_size = 150000)
+Hetp(vcf_file, window_size = 150000)
 }
 \arguments{
-\item{vcf_file}{A character string representing the path to the VCF file to be analyzed.}
+\item{vcf_file}{Path to a VCF file.}
 
-\item{window_size}{An integer specifying the size of the genomic window (in base pairs) for analysis. The default is set to 150,000.}
+\item{window_size}{Window size in base pairs. Defaults to 150,000.}
 }
 \value{
-A data frame containing the calculated heterozygosity per window, along with maximum and minimum SNP counts for each range.
-        The returned data frame includes columns for chromosome, range, maximum value, minimum value, heterozygosity (hp), and Z-scores of heterozygosity.
+A data frame with chromosome, genomic range, maximum and minimum
+  allele counts, Hp, and standardized ZHp values.
 }
 \description{
-This function calculates the heterozygosity per window from a VCF file, analyzing SNPs across specified genomic windows.
-}
-\details{
-The function reads a VCF file, processes SNP data to create genomic windows, and counts the number of SNPs within each window. 
-         It calculates the heterozygosity per window using the formula:
-         \deqn{hp = \frac{2 \cdot Max\_Value \cdot Min\_Value}{(Max\_Value + Min\_Value)^2}}
-         It also computes the Z-scores for heterozygosity values.
-}
-\note{
-The input VCF file must be in a valid format, and the function requires the `data.table` and `dplyr` packages for data manipulation.
+Calculate pooled heterozygosity (Hp) from SNP reference-allele counts in
+fixed-width windows across a VCF file.
 }
 \examples{
-# Example usage:
-heterozygosity_results <- Hetp("path/to/sample.vcf", window_size = 150000)
-
-# Output: A data frame with heterozygosity calculations for each window
+\dontrun{
+Hetp("path/to/sample.vcf", window_size = 150000)
+}
 
 }

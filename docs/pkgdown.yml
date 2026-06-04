@@ -1,0 +1,8 @@
+pandoc: 3.9.0.2
+pkgdown: 2.2.0
+pkgdown_sha: ~
+articles: {}
+last_built: 2026-06-04T05:31Z
+urls:
+  reference: https://malikbak.github.io/PopGenR/reference
+  article: https://malikbak.github.io/PopGenR/articles

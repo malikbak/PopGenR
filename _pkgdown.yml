@@ -1,0 +1,46 @@
+url: https://malikbak.github.io/PopGenR/
+
+template:
+  bootstrap: 5
+  bootswatch: flatly
+
+navbar:
+  structure:
+    left: [intro, reference, articles]
+    right: [github]
+  components:
+    github:
+      icon: fa-github
+      href: https://github.com/malikbak/PopGenR
+      aria-label: GitHub
+
+reference:
+  - title: VCF Input and Genotype Helpers
+    contents:
+      - read.vcf
+      - get.field
+      - count.genotypes
+      - allele.freq
+      - maf
+      - get.haplotypes
+      - derivedCount
+  - title: Diversity and Selection Statistics
+    contents:
+      - expected.het
+      - pi.diversity
+      - dnuc
+      - waterson.theta
+      - variance.d
+      - TajimaD
+      - Hetp
+      - calc_r2
+      - fixed.poly
+  - title: Annotation
+    contents:
+      - AnnoRan
+      - AnnoSin
+  - title: External Tools
+    contents:
+      - plQC
+      - RunHom
+      - Mbed

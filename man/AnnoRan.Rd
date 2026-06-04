@@ -2,61 +2,39 @@
 % Please edit documentation in R/AnnoRan.R
 \name{AnnoRan}
 \alias{AnnoRan}
-\title{AnnoRan: Annotate Regions of Homozygosity (ROH) Based on Genomic Annotations}
+\title{Annotate Genomic Regions with Gene Names}
 \usage{
-AnnoRan(
-  data = data,
-  CHR = chrcol,
-  starP = starP,
-  endP = endP,
-  annotation = Anofile
-)
+AnnoRan(data, CHR, starP, endP, annotation)
 }
 \arguments{
-\item{data}{A data frame containing the regions to be annotated. This should include columns for chromosome 
-identifier, start position, and end position.}
+\item{data}{A data frame containing the regions to annotate.}
 
-\item{CHR}{A character string or numeric value specifying the column in `data` representing the chromosome.}
+\item{CHR}{Column name or index in `data` containing chromosome identifiers.}
 
-\item{starP}{A character string or numeric value specifying the column in `data` representing the start 
-position of the regions.}
+\item{starP}{Column name or index in `data` containing region start positions.}
 
-\item{endP}{A character string or numeric value specifying the column in `data` representing the end position 
-of the regions.}
+\item{endP}{Column name or index in `data` containing region end positions.}
 
-\item{annotation}{A file path to a GFF/GTF file or a data frame containing gene annotations. If a character 
-path is provided, the function will read the GFF file using `rtracklayer::readGFF`. The data frame or file 
-should include columns for chromosome name, start position, end position, and gene name.}
+\item{annotation}{Either a data frame of gene annotations or a path to a
+GFF/GTF file. Data frames should contain `chromosome_name`,
+`start_position`, `end_position`, and `external_gene_name`.}
 }
 \value{
-A data frame that includes the original regions along with an additional column, `Matching_Names`, 
-which contains the gene names corresponding to the genomic regions.
+A data frame with `ID`, `Range`, and `Matching_Names`. `Matching_Names`
+  contains comma-separated gene names fully contained within each region, or
+  `"NA"` when no annotation overlaps.
 }
 \description{
-This function annotates genomic ranges within a dataset by matching them with corresponding gene annotations. 
-It is designed to work with a data frame containing regions of homozygosity (ROH) and a genomic annotation 
-file or data frame.
-}
-\details{
-The function works by first creating a new column, `region`, in the input `data` that combines the 
-start and end positions into a string format. It then matches these ranges with the gene annotations provided 
-via the `annotation` argument. If a match is found, the gene names are retrieved and associated with the 
-respective regions. If no match is found, "NA" is assigned.
-}
-\note{
-The function supports annotations provided either as a file in GFF/GTF format or as a data frame. It 
-expects the annotation data frame to have specific column names, such as `chromosome_name`, `start_position`, 
-`end_position`, and `external_gene_name` (or equivalent).
+Match genomic intervals, such as runs of homozygosity, to gene annotations.
 }
 \examples{
-# Example usage with data frame and GFF file:
-ROH_data <- data.frame(chr = c("1", "1"), start = c(1000, 5000), end = c(2000, 6000))
-annotation_file <- "path/to/annotation.gff"
-annotated_data <- AnnoRan(data = ROH_data, CHR = "chr", starP = "start", endP = "end", annotation = annotation_file)
-
-# Example usage with data frames:
-annotation_df <- data.frame(chromosome_name = c("1", "1"), start_position = c(1500, 5500), 
-                            end_position = c(1800, 5800), external_gene_name = c("Gene1", "Gene2"))
-annotated_data <- AnnoRan(data = ROH_data, CHR = "chr", starP = "start", endP = "end", annotation = annotation_df)
+regions <- data.frame(chr = c("1", "1"), start = c(1000, 5000), end = c(2000, 6500))
+genes <- data.frame(
+  chromosome_name = c("1", "1"),
+  start_position = c(1200, 5500),
+  end_position = c(1800, 6000),
+  external_gene_name = c("GeneA", "GeneB")
+)
+AnnoRan(regions, CHR = "chr", starP = "start", endP = "end", annotation = genes)
 
 }

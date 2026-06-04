@@ -25,7 +25,7 @@ The `get.field` and `count.genotypes` functions must be defined or available in 
 }
 \examples{
 # Example usage:
-variant <- c("chr1", "12345", "A", "T", "...", "...", "...", "...", "...", "0/0", "0/1", "1/1")
+variant <- c("chr1", "12345", ".", "A", "T", ".", "PASS", ".", "GT", "0/0", "0/1", "1/1")
 derived_allele_count <- derivedCount(variant)
 
 }
